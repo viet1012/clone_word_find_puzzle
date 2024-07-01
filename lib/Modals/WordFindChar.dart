@@ -1,14 +1,14 @@
 class WordFindChar {
   String? currentValue;
   int? currentIndex;
-  String correctValue;
+  String? correctValue;
   bool hintShow;
 
   WordFindChar({
     this.hintShow = false,
-    required this.correctValue,
-    required this.currentIndex,
-    required this.currentValue,
+    this.correctValue,
+    this.currentIndex,
+    this.currentValue,
   });
 
   getCurrentValue() {

@@ -41,6 +41,6 @@ class WordFindQues {
       answer: answer,
       pathImage: pathImage,
       question: question,
-    )..arrayBtns = List.from(arrayBtns);
+    );
   }
 }
