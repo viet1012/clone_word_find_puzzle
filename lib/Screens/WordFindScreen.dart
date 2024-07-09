@@ -12,8 +12,6 @@ class WordFindScreen extends StatefulWidget {
 }
 
 class _WordFindScreenState extends State<WordFindScreen> {
-  // make list question for puzzle
-  // make class 1st
   GlobalKey<WordFindWidgetState> globalKey = GlobalKey();
   late List<WordFindQues> listQuestions;
 
@@ -28,18 +26,20 @@ class _WordFindScreenState extends State<WordFindScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Word Find Game'),
+        backgroundColor: Colors.teal,
+      ),
       body: SafeArea(
         child: Container(
-          color: Colors.green,
+          color: Colors.white,
           child: Column(
             children: [
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return Container(
-                      color: Colors.blue,
-                      // lets make our word find widget
-                      // sent list to our widget
+                      color: Colors.teal[50],
                       child: WordFindWidget(
                         constraints.biggest,
                         listQuestions.map((ques) => ques.clone()).toList(),
@@ -50,11 +50,27 @@ class _WordFindScreenState extends State<WordFindScreen> {
                 ),
               ),
               Container(
-                child: TextButton(
+                padding: EdgeInsets.all(10),
+                child: ElevatedButton(
                   onPressed: () {
-                    // reload btn test
+                    // reload button action
+                    setState(() {
+                      listQuestions =
+                          listQuestions.map((ques) => ques.clone()).toList();
+                      globalKey.currentState?.generatePuzzle();
+                    });
                   },
-                  child: Text("reload"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  ),
+                  child: const Text(
+                    "Reload",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    ),
+                  ),
                 ),
               )
             ],

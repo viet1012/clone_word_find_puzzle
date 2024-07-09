@@ -1,9 +1,11 @@
 import 'dart:math';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 import '../Modals/WordFindChar.dart';
 import '../Modals/WordFindQues.dart';
+import '../common.dart';
 
 class WordFindWidget extends StatefulWidget {
   final Size size;
@@ -21,7 +23,7 @@ class WordFindWidgetState extends State<WordFindWidget> {
   late List<WordFindQues> listQuestions;
   int indexQues = 0; // current index question
   int hintCount = 0;
-
+  final audioCache = AudioPlayer();
   @override
   void initState() {
     super.initState();
@@ -44,32 +46,32 @@ class WordFindWidgetState extends State<WordFindWidget> {
               children: [
                 InkWell(
                   onTap: () => generateHint(),
-                  child: Icon(
+                  child: const Icon(
                     Icons.healing_outlined,
                     size: 45,
-                    color: Colors.yellow[200],
+                    color: Colors.teal,
                   ),
                 ),
                 Row(
                   children: [
                     InkWell(
                       onTap: () => generatePuzzle(left: true),
-                      child: Icon(
+                      child: const Icon(
                         Icons.arrow_back_ios,
                         size: 45,
-                        color: Colors.yellow[200],
+                        color: Colors.teal,
                       ),
                     ),
                     InkWell(
                       onTap: () => generatePuzzle(next: true),
-                      child: Icon(
+                      child: const Icon(
                         Icons.arrow_forward_ios,
                         size: 45,
-                        color: Colors.yellow[200],
+                        color: Colors.teal,
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -81,7 +83,6 @@ class WordFindWidgetState extends State<WordFindWidget> {
                 alignment: Alignment.center,
                 constraints: BoxConstraints(
                   maxWidth: size.width / 2 * 1.5,
-                  // maxHeight: size.width / 2.5,
                 ),
                 child: Image.network(
                   currentQues.pathImage,
@@ -91,16 +92,82 @@ class WordFindWidgetState extends State<WordFindWidget> {
             ),
           ),
           Container(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
+            alignment: Alignment.center,
+            child: Text(
+              "${currentQues.question ?? ''}",
+              style: const TextStyle(
+                fontSize: 25,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
+            alignment: Alignment.center,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: currentQues.puzzles.map((puzzle) {
+                    // later change color based condition
+                    Color? color;
+
+                    if (currentQues.isDone)
+                      color = Colors.green[300];
+                    else if (puzzle.hintShow)
+                      color = Colors.yellow[100];
+                    else if (currentQues.isFull)
+                      color = Colors.red;
+                    else
+                      color = Color(0xff7EE7FD);
+
+                    return InkWell(
+                      onTap: () {
+                        if (puzzle.hintShow || currentQues.isDone) return;
+                        audioCache.play(AssetSource('sounds/click_sound.mp3'));
+
+                        currentQues.isFull = false;
+                        puzzle.clearValue();
+                        setState(() {});
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        width: constraints.biggest.width / 7 - 6,
+                        height: constraints.biggest.width / 7 - 6,
+                        margin: const EdgeInsets.all(3),
+                        child: Text(
+                          "${puzzle.currentValue ?? ''}".toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(10),
             alignment: Alignment.center,
             child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 childAspectRatio: 1,
                 crossAxisCount: 8,
                 crossAxisSpacing: 4,
                 mainAxisSpacing: 4,
               ),
-              itemCount: 16, // later change
+              itemCount: currentQues.arrayBtns.length,
               shrinkWrap: true,
               itemBuilder: (context, index) {
                 bool statusBtn = currentQues.puzzles
@@ -110,26 +177,28 @@ class WordFindWidgetState extends State<WordFindWidget> {
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     Color color =
-                        statusBtn ? Colors.white70 : Color(0xff7EE7FD);
+                        statusBtn ? Colors.black : const Color(0xff7EE7FD);
 
                     return Container(
                       decoration: BoxDecoration(
                         color: color,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      // margin: ,
                       alignment: Alignment.center,
                       child: TextButton(
-                        //  height: constraints.biggest.height,
                         child: Text(
                           "${currentQues.arrayBtns[index]}".toUpperCase(),
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 25,
                             fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                         onPressed: () {
-                          // if (!statusBtn) setBtnClick(index);
+                          // handle button press
+                          if (!statusBtn) {
+                            setBtnClick(index);
+                          }
                         },
                       ),
                     );
@@ -143,14 +212,11 @@ class WordFindWidgetState extends State<WordFindWidget> {
     );
   }
 
-  void generateHint() {}
-
   void generatePuzzle({
     List<WordFindQues>? loop,
     bool next = false,
     bool left = false,
   }) {
-    // Let's finish up generate puzzle
     if (loop != null) {
       indexQues = 0;
       this.listQuestions.addAll(loop);
@@ -168,40 +234,116 @@ class WordFindWidgetState extends State<WordFindWidget> {
 
     WordFindQues currentQues = listQuestions[indexQues];
 
-    setState(() {});
+    // Generate list of characters including answer characters and random characters
+    final String answer = currentQues.answer.toUpperCase();
+    List<String> characters = answer.split('');
 
-    final List<String> wl = [currentQues.answer];
-
-    // Generate random word grid as a replacement
     Random random = Random();
-    final int gridWidth = 16; // Width of the word grid
-    final int gridHeight = 1; // Height of the word grid
+    while (characters.length < 16) {
+      characters.add(String.fromCharCode(65 + random.nextInt(26)));
+    }
 
-    List<List<String>> randomGrid = List.generate(
-      gridHeight,
-      (row) => List.generate(
-        gridWidth,
-        (col) {
-          int randomIndex = random.nextInt(
-              26); // Generate random letter index (assuming 26 letters)
-          return String.fromCharCode(
-              65 + randomIndex); // Convert to random uppercase letter
-        },
-      ),
-    );
+    // Shuffle the characters to make the puzzle grid
+    characters.shuffle();
 
-    currentQues.arrayBtns = randomGrid.expand((list) => list).toList();
-    currentQues.arrayBtns.shuffle(); // Shuffle the grid to hide the answer
+    currentQues.arrayBtns = characters;
 
     bool isDone = currentQues.isDone;
-
     if (!isDone) {
-      currentQues.puzzles = List.generate(wl[0].split("").length, (index) {
-        return WordFindChar(correctValue: currentQues.answer.split("")[index]);
+      currentQues.puzzles = List.generate(answer.length, (index) {
+        return WordFindChar(correctValue: answer[index]);
       });
     }
 
-    hintCount = 0; // Number of hints per question we hit
+    hintCount = 0;
     setState(() {});
+  }
+
+  Future<void> setBtnClick(int index) async {
+    WordFindQues currentQues = listQuestions[indexQues];
+    await audioCache.play(AssetSource('sounds/click_sound.mp3'));
+
+    int currentIndexEmpty =
+        currentQues.puzzles.indexWhere((puzzle) => puzzle.currentValue == null);
+
+    if (currentIndexEmpty >= 0) {
+      currentQues.puzzles[currentIndexEmpty].currentIndex = index;
+      currentQues.puzzles[currentIndexEmpty].currentValue =
+          currentQues.arrayBtns[index];
+      if (currentQues.fieldCompleteCorrect()) {
+        audioCache.play(AssetSource('sounds/correct_sound.mp3'));
+        currentQues.isDone = true;
+        setState(() {});
+        if (indexQues >= listQuestions.length - 1) {
+          await Future.delayed(Duration(seconds: 1));
+          Common.showCompletionDialog(context, resetGame);
+        } else {
+          await Future.delayed(Duration(seconds: 1));
+          generatePuzzle(next: true);
+        }
+      } else if (currentQues.puzzles
+          .every((puzzle) => puzzle.currentValue != null)) {
+        audioCache.play(AssetSource('sounds/error_sound.mp3'));
+        Common.showErrorDialog(context);
+      }
+
+      setState(() {});
+    }
+  }
+
+  void resetGame() {
+    setState(() {
+      indexQues = 0;
+      hintCount = 0;
+      listQuestions.forEach((ques) {
+        ques.isDone = false;
+        ques.puzzles.forEach((puzzle) {
+          puzzle.clearValue();
+        });
+      });
+      generatePuzzle();
+    });
+  }
+
+  generateHint() async {
+    WordFindQues currentQues = listQuestions[indexQues];
+    for (var item in currentQues.puzzles) {
+      print("item:  ${item.correctValue}");
+    }
+    List<WordFindChar> puzzleNoHints = currentQues.puzzles
+        .where((puzzle) => !puzzle.hintShow && puzzle.currentIndex == null)
+        .toList();
+
+    if (puzzleNoHints.isNotEmpty) {
+      hintCount++;
+      int indexHint = Random().nextInt(puzzleNoHints.length);
+      int countTemp = 0;
+      print("hint $indexHint");
+
+      currentQues.puzzles = currentQues.puzzles.map((puzzle) {
+        if (!puzzle.hintShow && puzzle.currentIndex == null) countTemp++;
+
+        if (indexHint == countTemp - 1) {
+          puzzle.hintShow = true;
+          puzzle.currentValue = puzzle.correctValue;
+
+          puzzle.currentIndex = currentQues.arrayBtns
+              .indexWhere((btn) => btn == puzzle.correctValue);
+        }
+
+        return puzzle;
+      }).toList();
+
+      // check if complete
+      if (currentQues.fieldCompleteCorrect()) {
+        currentQues.isDone = true;
+        setState(() {});
+        await Future.delayed(const Duration(seconds: 1));
+        generatePuzzle(next: true);
+      }
+
+      // my wrong..not refresh.. damn..haha
+      setState(() {});
+    }
   }
 }

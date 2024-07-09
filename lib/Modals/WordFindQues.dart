@@ -20,20 +20,12 @@ class WordFindQues {
   void setIsDone() => isDone = true;
 
   bool fieldCompleteCorrect() {
-    bool complete =
-        puzzles.where((puzzle) => puzzle.currentValue == null).isEmpty;
-
-    if (!complete) {
-      this.isFull = false;
-      return complete;
+    for (var puzzle in puzzles) {
+      if (puzzle.currentValue != puzzle.correctValue) {
+        return false;
+      }
     }
-
-    this.isFull = true;
-
-    String answeredString =
-        this.puzzles.map((puzzle) => puzzle.currentValue).join("");
-
-    return answeredString == this.answer;
+    return true;
   }
 
   WordFindQues clone() {
