@@ -66,7 +66,7 @@ class Common {
     );
   }
 
-  static void showErrorDialog(BuildContext context) {
+  static void showErrorDialog(BuildContext context, Function resetGame) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -105,6 +105,7 @@ class Common {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
+                resetGame();
               },
             ),
           ],

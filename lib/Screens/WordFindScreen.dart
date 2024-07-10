@@ -62,7 +62,12 @@ class _WordFindScreenState extends State<WordFindScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: const Text(
                     "Reload",

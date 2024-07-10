@@ -15,7 +15,7 @@ class MatchstickItem extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isActive ? Colors.brown : Colors.transparent,
+          color: isActive ? Colors.teal : Colors.transparent,
           border: Border.all(color: Colors.brown, width: 2.0),
           borderRadius: BorderRadius.circular(4.0),
         ),
@@ -27,7 +27,7 @@ class MatchstickItem extends StatelessWidget {
               quarterTurns: isActive ? 2 : 0,
               child: Container(
                 decoration: BoxDecoration(
-                  color: isActive ? Colors.orange : Colors.transparent,
+                  color: isActive ? Colors.white : Colors.transparent,
                 ),
               ),
             ),

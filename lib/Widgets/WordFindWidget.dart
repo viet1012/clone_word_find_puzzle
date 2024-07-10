@@ -284,7 +284,7 @@ class WordFindWidgetState extends State<WordFindWidget> {
       } else if (currentQues.puzzles
           .every((puzzle) => puzzle.currentValue != null)) {
         audioCache.play(AssetSource('sounds/error_sound.mp3'));
-        Common.showErrorDialog(context);
+        Common.showErrorDialog(context, resetGame);
       }
 
       setState(() {});
