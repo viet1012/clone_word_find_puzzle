@@ -1,8 +1,10 @@
 import 'dart:math';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:clone_word_find_puzzle/common.dart';
 import 'package:flutter/material.dart';
 
+import '../Widgets/AppBarWidget.dart';
 import '../Widgets/MatchsticksGrid.dart';
 
 class MatchesPuzzleScreen extends StatefulWidget {
@@ -24,7 +26,7 @@ class _MatchesPuzzleScreenState extends State<MatchesPuzzleScreen> {
   String displayedEquation = ''; // Equation with dynamic result
   List<bool> matchsticks = []; // Matchsticks for current equation
   int expectedMatchstickCount = 0; // Expected number of matchsticks
-
+  final audioCache = AudioPlayer();
   @override
   void initState() {
     super.initState();
@@ -67,12 +69,24 @@ class _MatchesPuzzleScreenState extends State<MatchesPuzzleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Matches Puzzle'),
-        backgroundColor: Colors.teal,
-      ),
+      appBar: CommonAppBar(
+          title: 'Game 03',
+          onPressed: () {
+            String description =
+                '- Tap each matchstick to toggle its state (on/off).\n'
+                '- Match the number of active matchsticks to the result shown.\n'
+                '- Tap Check Solution to validate your answer.\n'
+                '- Complete all equations to finish the game.';
+            Common.showInstructionsDialog(context, description);
+          }),
       body: Container(
-        color: Colors.teal[50],
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade50, Colors.teal.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -89,15 +103,23 @@ class _MatchesPuzzleScreenState extends State<MatchesPuzzleScreen> {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.grey[50],
-                  border: Border.all(width: 1.5, color: Colors.black),
+                  border: Border.all(width: 1.5, color: Colors.teal),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  displayedEquation,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.teal,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return ScaleTransition(child: child, scale: animation);
+                  },
+                  child: Text(
+                    displayedEquation,
+                    key: ValueKey<String>(displayedEquation),
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal,
+                    ),
                   ),
                 ),
               ),
@@ -128,8 +150,10 @@ class _MatchesPuzzleScreenState extends State<MatchesPuzzleScreen> {
                 onPressed: () {
                   bool solutionCorrect = validateSolution();
                   if (solutionCorrect) {
+                    Common.playSound('correct_sound.mp3');
                     Common.showCompletionDialog(context, loadNextPuzzle);
                   } else {
+                    Common.playSound('error_sound.mp3');
                     Common.showErrorDialog(context, reset);
                   }
                 },

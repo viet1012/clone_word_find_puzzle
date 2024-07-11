@@ -1,7 +1,9 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
+import '../Widgets/AppBarWidget.dart';
 import '../common.dart';
+import 'MatchesPuzzleScreen.dart';
 
 class WordSearchPuzzleScreen extends StatefulWidget {
   @override
@@ -88,10 +90,10 @@ class _WordSearchPuzzleScreenState extends State<WordSearchPuzzleScreen> {
     String currentWord = currentSelection
         .map((offset) => puzzle[offset.dx.toInt()][offset.dy.toInt()])
         .join();
-
+    print("currentWord " + currentWord);
     for (String word in words) {
       if (currentWord == word && !foundWords.contains(word)) {
-        audioCache.play(AssetSource('sounds/correct_sound.mp3'));
+        Common.playSound('correct_sound.mp3');
 
         setState(() {
           foundWords.add(word);
@@ -104,7 +106,17 @@ class _WordSearchPuzzleScreenState extends State<WordSearchPuzzleScreen> {
         currentSelection.clear();
         if (foundWords.length == words.length) {
           completedPuzzles.add(currentPuzzleIndex);
-          Common.showCompletionDialog(context, nextPuzzle);
+          // Check if all puzzles are completed
+          if (completedPuzzles.length == puzzleLists.length) {
+            Common.showGameCompletionDialog(context, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MatchesPuzzleScreen()),
+              );
+            });
+          } else {
+            Common.showCompletionDialog(context, nextPuzzle);
+          }
         }
       }
     }
@@ -136,15 +148,26 @@ class _WordSearchPuzzleScreenState extends State<WordSearchPuzzleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Word Find Game'),
-        backgroundColor: Colors.teal,
-      ),
+      appBar: CommonAppBar(
+          title: 'Game 02',
+          onPressed: () {
+            String instructions =
+                '- Tap a tile adjacent to the empty space to move it into the empty space\n'
+                '- Keep moving the tiles until you solve the puzzle';
+
+            Common.showInstructionsDialog(context, instructions);
+          }),
       body: Stack(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.teal[50],
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.teal.shade50, Colors.teal.shade400],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
             child: Column(
               children: [
                 Card(
@@ -210,13 +233,15 @@ class _WordSearchPuzzleScreenState extends State<WordSearchPuzzleScreen> {
                                   : null,
                               iconSize: 36,
                             ),
-                            SizedBox(width: 20),
+                            const SizedBox(width: 20),
                             IconButton(
-                              icon: Icon(Icons.arrow_forward_ios,
-                                  color: currentPuzzleIndex <
-                                          puzzleLists.length - 1
-                                      ? Colors.teal
-                                      : Colors.grey),
+                              icon: Icon(
+                                Icons.arrow_forward_ios,
+                                color:
+                                    currentPuzzleIndex < puzzleLists.length - 1
+                                        ? Colors.teal
+                                        : Colors.grey,
+                              ),
                               onPressed:
                                   currentPuzzleIndex < puzzleLists.length - 1
                                       ? nextPuzzle
@@ -239,26 +264,40 @@ class _WordSearchPuzzleScreenState extends State<WordSearchPuzzleScreen> {
                     itemBuilder: (context, index) {
                       int row = index ~/ puzzle[0].length;
                       int col = index % puzzle[0].length;
+                      bool isCorrect = correct[row][col];
+                      bool isSelected = selected[row][col];
+
                       return GestureDetector(
                         onTap: () => handleTap(row, col),
-                        child: Container(
-                          alignment: Alignment.center,
-                          margin: const EdgeInsets.all(4),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
                           decoration: BoxDecoration(
-                            color: correct[row][col]
+                            color: isCorrect
                                 ? Colors.green
-                                : selected[row][col]
+                                : isSelected
                                     ? Colors.teal.shade300
                                     : Colors.teal.shade50,
                             border: Border.all(color: Colors.teal),
                             borderRadius: BorderRadius.circular(8),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.teal.withOpacity(0.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 5,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ]
+                                : [], // Add a shadow when selected
                           ),
-                          child: Text(
-                            puzzle[row][col],
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                          child: Center(
+                            child: Text(
+                              puzzle[row][col],
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ),
@@ -269,44 +308,44 @@ class _WordSearchPuzzleScreenState extends State<WordSearchPuzzleScreen> {
               ],
             ),
           ),
-          if (completedPuzzles.contains(currentPuzzleIndex))
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withOpacity(0.7),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.check_circle,
-                        color: Colors.green, size: 100),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Puzzle Completed!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: nextPuzzle,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 15),
-                        textStyle: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
-                      child: const Text('Next Puzzle'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          // if (completedPuzzles.contains(currentPuzzleIndex))
+          // Positioned.fill(
+          //   child: Container(
+          //     color: Colors.black.withOpacity(0.7),
+          //     child: Column(
+          //       mainAxisAlignment: MainAxisAlignment.center,
+          //       children: [
+          //         const Icon(Icons.check_circle,
+          //             color: Colors.green, size: 100),
+          //         const SizedBox(height: 20),
+          //         const Text(
+          //           'Puzzle Completed!',
+          //           style: TextStyle(
+          //             color: Colors.white,
+          //             fontSize: 32,
+          //             fontWeight: FontWeight.bold,
+          //           ),
+          //         ),
+          //         const SizedBox(height: 20),
+          //         ElevatedButton(
+          //           onPressed: nextPuzzle,
+          //           style: ElevatedButton.styleFrom(
+          //             backgroundColor: Colors.teal,
+          //             foregroundColor: Colors.white,
+          //             padding: const EdgeInsets.symmetric(
+          //                 horizontal: 40, vertical: 15),
+          //             textStyle: const TextStyle(
+          //                 fontSize: 18, fontWeight: FontWeight.bold),
+          //             shape: RoundedRectangleBorder(
+          //               borderRadius: BorderRadius.circular(15),
+          //             ),
+          //           ),
+          //           child: const Text('Next Puzzle'),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

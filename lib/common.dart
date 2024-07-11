@@ -1,6 +1,13 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 class Common {
+  static final AudioPlayer _audioPlayer = AudioPlayer();
+
+  static void playSound(String fileName) {
+    _audioPlayer.play(AssetSource('sounds/$fileName'));
+  }
+
   static void showCompletionDialog(BuildContext context, Function resetGame) {
     showDialog(
       context: context,
@@ -109,6 +116,138 @@ class Common {
               },
             ),
           ],
+        );
+      },
+    );
+  }
+
+  static void showGameCompletionDialog(
+      BuildContext context, VoidCallback? onDismiss) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing dialog on tap outside
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Stack(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(20.0),
+                margin: EdgeInsets.only(top: 20.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10.0),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black,
+                      offset: Offset(0, 10),
+                      blurRadius: 10.0,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const Text(
+                      'Congratulations!',
+                      style: TextStyle(
+                        fontSize: 28.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 10.0),
+                    const Text(
+                      'You have completed all questions!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 18.0),
+                    ),
+                    SizedBox(height: 20.0),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
+                        if (onDismiss != null) {
+                          onDismiss(); // Call the callback function
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 30.0, vertical: 10.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                      ),
+                      child: Text(
+                        'OK',
+                        style: TextStyle(fontSize: 18.0, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 20,
+                right: 20,
+                child: CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  radius: 20,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.all(Radius.circular(20)),
+                    child: Image.asset('assets/images/congrats.jpg'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  static void showInstructionsDialog(BuildContext context, String description) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'How to Play',
+            style: TextStyle(
+              color: Colors.teal,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            description,
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Got it!',
+                style: TextStyle(
+                  color: Colors.teal,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ],
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 8,
         );
       },
     );

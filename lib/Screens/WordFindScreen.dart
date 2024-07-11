@@ -1,7 +1,10 @@
+import 'package:clone_word_find_puzzle/common.dart';
 import 'package:flutter/material.dart';
 
 import '../Modals/WordFindGame.dart';
 import '../Modals/WordFindQues.dart';
+import '../Widgets/AppBarWidget.dart';
+import '../Widgets/ButtonWidget.dart';
 import '../Widgets/WordFindWidget.dart';
 
 class WordFindScreen extends StatefulWidget {
@@ -26,13 +29,21 @@ class _WordFindScreenState extends State<WordFindScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Word Find Game'),
-        backgroundColor: Colors.teal,
-      ),
+      appBar: CommonAppBar(
+          title: 'Game 01',
+          onPressed: () {
+            Common.showInstructionsDialog(context,
+                '- Arrange the letters in the grid to reveal the hidden word(s). Each puzzle provides an image clue to guide you.');
+          }),
       body: SafeArea(
         child: Container(
-          color: Colors.white,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade50, Colors.teal.shade400],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
           child: Column(
             children: [
               Expanded(
@@ -51,33 +62,14 @@ class _WordFindScreenState extends State<WordFindScreen> {
               ),
               Container(
                 padding: EdgeInsets.all(10),
-                child: ElevatedButton(
-                  onPressed: () {
-                    // reload button action
-                    setState(() {
-                      listQuestions =
-                          listQuestions.map((ques) => ques.clone()).toList();
-                      globalKey.currentState?.generatePuzzle();
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    "Reload",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-              )
+                child: ReloadButton(onPressed: () {
+                  setState(() {
+                    listQuestions =
+                        listQuestions.map((ques) => ques.clone()).toList();
+                    globalKey.currentState?.generatePuzzle();
+                  });
+                }),
+              ),
             ],
           ),
         ),

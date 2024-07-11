@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../Modals/WordFindChar.dart';
 import '../Modals/WordFindQues.dart';
+import '../Screens/WordSearchPuzzleScreen.dart';
 import '../common.dart';
 
 class WordFindWidget extends StatefulWidget {
@@ -56,18 +57,20 @@ class WordFindWidgetState extends State<WordFindWidget> {
                   children: [
                     InkWell(
                       onTap: () => generatePuzzle(left: true),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_back_ios,
-                        size: 45,
-                        color: Colors.teal,
+                        size: 36,
+                        color: indexQues > 0 ? Colors.teal : Colors.grey,
                       ),
                     ),
                     InkWell(
                       onTap: () => generatePuzzle(next: true),
-                      child: const Icon(
+                      child: Icon(
                         Icons.arrow_forward_ios,
-                        size: 45,
-                        color: Colors.teal,
+                        size: 36,
+                        color: indexQues < listQuestions.length - 1
+                            ? Colors.teal
+                            : Colors.grey,
                       ),
                     ),
                   ],
@@ -78,7 +81,7 @@ class WordFindWidgetState extends State<WordFindWidget> {
           Expanded(
             child: Container(
               alignment: Alignment.center,
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: Container(
                 alignment: Alignment.center,
                 constraints: BoxConstraints(
@@ -271,20 +274,27 @@ class WordFindWidgetState extends State<WordFindWidget> {
       currentQues.puzzles[currentIndexEmpty].currentValue =
           currentQues.arrayBtns[index];
       if (currentQues.fieldCompleteCorrect()) {
-        audioCache.play(AssetSource('sounds/correct_sound.mp3'));
+        Common.playSound('correct_sound.mp3');
+        //Common.showCompletionDialog(context, resetQuestionCurrent);
         currentQues.isDone = true;
         setState(() {});
         if (indexQues >= listQuestions.length - 1) {
           await Future.delayed(Duration(seconds: 1));
-          Common.showCompletionDialog(context, resetGame);
+          Common.showGameCompletionDialog(context, () {
+            // Perform any action after dismissing the dialog
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => WordSearchPuzzleScreen()),
+            );
+          });
         } else {
           await Future.delayed(Duration(seconds: 1));
           generatePuzzle(next: true);
         }
       } else if (currentQues.puzzles
           .every((puzzle) => puzzle.currentValue != null)) {
-        audioCache.play(AssetSource('sounds/error_sound.mp3'));
-        Common.showErrorDialog(context, resetGame);
+        Common.playSound('error_sound.mp3');
+        Common.showErrorDialog(context, resetQuestionCurrent);
       }
 
       setState(() {});
@@ -302,6 +312,17 @@ class WordFindWidgetState extends State<WordFindWidget> {
         });
       });
       generatePuzzle();
+    });
+  }
+
+  void resetQuestionCurrent() {
+    setState(() {
+      hintCount = 0;
+      listQuestions[indexQues].isDone = false;
+      listQuestions[indexQues].puzzles.forEach((puzzle) {
+        puzzle.clearValue();
+        puzzle.hintShow = false;
+      });
     });
   }
 
@@ -339,7 +360,21 @@ class WordFindWidgetState extends State<WordFindWidget> {
         currentQues.isDone = true;
         setState(() {});
         await Future.delayed(const Duration(seconds: 1));
-        generatePuzzle(next: true);
+        if (indexQues >= listQuestions.length - 1) {
+          // All questions are completed
+          Common.showCompletionDialog(context, () {
+            // Navigate to new screen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    WordSearchPuzzleScreen(), // Replace with your next screen
+              ),
+            );
+          });
+        } else {
+          generatePuzzle(next: true);
+        }
       }
 
       // my wrong..not refresh.. damn..haha

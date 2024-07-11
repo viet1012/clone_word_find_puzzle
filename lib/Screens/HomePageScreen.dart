@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'MatchesPuzzleScreen.dart';
+import 'NumberPuzzleScreen.dart';
 import 'WordFindScreen.dart';
 import 'WordSearchPuzzleScreen.dart'; // Import màn hình mới
 
@@ -115,6 +116,35 @@ class HomePage extends StatelessWidget {
                   ),
                   child: const Text(
                     'Play game 3',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NumberPuzzleScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purpleAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 32),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: const Text(
+                    'Play game 4',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
