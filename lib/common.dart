@@ -215,7 +215,7 @@ class Common {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
+          title: const Text(
             'How to Play',
             style: TextStyle(
               color: Colors.teal,
@@ -224,6 +224,7 @@ class Common {
             ),
           ),
           content: Text(
+            textAlign: TextAlign.left,
             description,
             style: TextStyle(
               fontSize: 16,
@@ -234,7 +235,7 @@ class Common {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text(
+              child: const Text(
                 'Got it!',
                 style: TextStyle(
                   color: Colors.teal,

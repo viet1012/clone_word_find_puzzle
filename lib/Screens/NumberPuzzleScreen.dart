@@ -26,7 +26,9 @@ class _NumberPuzzleScreenState extends State<NumberPuzzleScreen> {
       setState(() {
         _swapWithEmpty(index);
         if (_isSolved()) {
-          Common.showGameCompletionDialog(context, null);
+          Common.showCompletionDialog(context, () {
+            loadNextRound(context);
+          });
         }
       });
     }
@@ -55,11 +57,26 @@ class _NumberPuzzleScreenState extends State<NumberPuzzleScreen> {
         return false;
       }
     }
-    return numbers.last == 0;
+    if (numbers.last == 0) {
+      Common.showCompletionDialog(context, () {
+        loadNextRound(context);
+      });
+      return true;
+    }
+    return false;
   }
 
   void _resetGame() {
     setState(() {
+      numbers.shuffle();
+    });
+  }
+
+  void loadNextRound(BuildContext dialogContext) {
+    Navigator.of(dialogContext).pop();
+    setState(() {
+      gridSize = 4; // Thay đổi kích thước lưới cho vòng tiếp theo
+      numbers = List.generate(gridSize * gridSize, (index) => index);
       numbers.shuffle();
     });
   }
@@ -71,9 +88,10 @@ class _NumberPuzzleScreenState extends State<NumberPuzzleScreen> {
         title: "Game 04",
         onPressed: () {
           Common.showInstructionsDialog(
-              context,
-              '- The goal is to arrange the tiles in numerical order from 1 to 8, with the empty space at the bottom right corner.\n\n'
-              '- Tap a tile adjacent to the empty space to move it into the empty space. Keep moving the tiles until you solve the puzzle!');
+            context,
+            '- The goal is to arrange the tiles in numerical order from 1 to 8, with the empty space at the bottom right corner.\n\n'
+            '- Tap a tile adjacent to the empty space to move it into the empty space. Keep moving the tiles until you solve the puzzle!',
+          );
         },
       ),
       body: Container(
