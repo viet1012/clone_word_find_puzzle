@@ -87,7 +87,7 @@ class WordFindWidgetState extends State<WordFindWidget> {
                 constraints: BoxConstraints(
                   maxWidth: size.width / 2 * 1.5,
                 ),
-                child: Image.network(
+                child: Image.asset(
                   currentQues.pathImage,
                   fit: BoxFit.contain,
                 ),
@@ -128,6 +128,12 @@ class WordFindWidgetState extends State<WordFindWidget> {
                     else
                       color = Color(0xff7EE7FD);
 
+                    double width = constraints.biggest.width / 7 - 6;
+                    double height = constraints.biggest.width / 7 - 6;
+
+                    if (width <= 0) width = 1;
+                    if (height <= 0) height = 1;
+
                     return InkWell(
                       onTap: () {
                         if (puzzle.hintShow || currentQues.isDone) return;
@@ -143,14 +149,21 @@ class WordFindWidgetState extends State<WordFindWidget> {
                           color: color,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        width: constraints.biggest.width / 7 - 6,
-                        height: constraints.biggest.width / 7 - 6,
+                        width: width,
+                        height: height,
                         margin: const EdgeInsets.all(3),
-                        child: Text(
-                          "${puzzle.currentValue ?? ''}".toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: SizedBox(
+                            width: width,
+                            child: Text(
+                              "${puzzle.currentValue ?? ''}".toUpperCase(),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                       ),
